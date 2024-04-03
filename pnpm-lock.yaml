@@ -15,7 +15,7 @@ dependencies:
     specifier: ^3.0.1
     version: 3.0.1
   tailwind-merge:
-    specifier: ^2.0.0
+    specifier: ^1.0.0 || ^2.0.0
     version: 2.2.2
   tailwindcss-animate:
     specifier: ^1.0.7

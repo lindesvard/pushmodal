@@ -108,4 +108,15 @@ type PushModalOptions = {
 
 ## Issues
 
-Known issues will be listed here
+### No styling?
+
+You might need to add the following to you tailwind.config. Of provide your own [wrapper](src/components/wrappers.tsx) as option for `createPushModal`.
+
+```js
+// tailwind.config.js
+  ...
+  content: [
+    './node_modules/pushmodal/**/*.js', // <---
+  ],
+  ...
+```

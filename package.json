@@ -1,6 +1,6 @@
 {
   "name": "pushmodal",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "description": "Handle shadcn dialog, sheet and drawer with ease",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
@@ -32,18 +32,18 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/DonAdam2/react-rollup-npm-boilerplate.git"
+    "url": "git+https://github.com/lindesvard/pushmodal.git"
   },
   "keywords": [
     "react",
     "button"
   ],
-  "author": "Adam Morsi <adam.morsi@yahoo.com> (https://github.com/DonAdam2)",
+  "author": "Carl Lindesvärd (https://git.new/carl)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/DonAdam2/react-rollup-npm-boilerplate/issues"
+    "url": "https://github.com/lindesvard/pushmodal/issues"
   },
-  "homepage": "https://github.com/DonAdam2/react-rollup-npm-boilerplate#readme",
+  "homepage": "https://git.new/pushmodal",
   "devDependencies": {
     "@babel/core": "7.24.0",
     "@babel/preset-react": "7.23.3",
@@ -122,7 +122,7 @@
     "clsx": "^2.0.0",
     "react": "^16.12.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^20.0.0 || ^21.0.0",
     "react-dom": "^16.12.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^20.0.0 || ^21.0.0",
-    "tailwind-merge": "^2.0.0",
+    "tailwind-merge": "^1.0.0 || ^2.0.0",
     "tailwindcss-animate": "^1.0.7"
   },
   "config": {
