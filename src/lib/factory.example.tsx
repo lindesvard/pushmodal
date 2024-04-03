@@ -14,13 +14,13 @@ export function FactoryExample() {
               <div className="flex gap-4">
                 <button
                   className="bg-black text-white px-4 py-2 rounded-md"
-                  onClick={() => pushModal('ModalExample', {})}
+                  onClick={() => pushModal('ModalExample')}
                 >
                   Open Modal
                 </button>
                 <button
                   className="bg-black text-white px-4 py-2 rounded-md"
-                  onClick={() => pushModal('SheetExample', {})}
+                  onClick={() => pushModal('SheetExample')}
                 >
                   Open Sheet
                 </button>
@@ -32,13 +32,13 @@ export function FactoryExample() {
               <div className="flex gap-4">
                 <button
                   className="bg-black text-white px-4 py-2 rounded-md"
-                  onClick={() => pushModal('ModalExample', {})}
+                  onClick={() => pushModal('ModalExample')}
                 >
                   Open Modal
                 </button>
                 <button
                   className="bg-black text-white px-4 py-2 rounded-md"
-                  onClick={() => pushModal('SheetExample', {})}
+                  onClick={() => pushModal('SheetExample')}
                 >
                   Open Sheet
                 </button>
@@ -63,13 +63,13 @@ export function FactoryExample() {
       <div className="flex gap-4">
         <button
           className="bg-black text-white px-4 py-2 rounded-md"
-          onClick={() => pushModal('ModalExample', {})}
+          onClick={() => pushModal('ModalExample')}
         >
           Open Modal
         </button>
         <button
           className="bg-black text-white px-4 py-2 rounded-md"
-          onClick={() => pushModal('SheetExample', {})}
+          onClick={() => pushModal('SheetExample')}
         >
           Open Sheet
         </button>

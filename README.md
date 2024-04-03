@@ -106,8 +106,6 @@ type PushModalOptions = {
 - Add option to enable/disable close on click outside
 - Add option to enable/disable press ESC to close
 
-## Issues 
+## Issues
 
-### pushModal
-
-`pushModal` is smart but still not smart enough. It'll infer types from your components. But if you want to push a modal that does not have any props `pushModal('Modal1')` typescript will complain. You will need to do `pushModal('Modal1', {})` (PR's are welcome to fix this 😅)
+Known issues will be listed here
