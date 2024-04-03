@@ -108,6 +108,19 @@ type PushModalOptions = {
 
 ## Issues 
 
+### No styling?
+
+You might need to add the following to you tailwind.config. Of provide your own [wrapper](src/components/wrappers.tsx) as option for `createPushModal`.
+
+```js
+// tailwind.config.js
+  ...
+  content: [
+    './node_modules/pushmodal/**/*.js', // <---
+  ],
+  ...
+```
+
 ### pushModal
 
 `pushModal` is smart but still not smart enough. It'll infer types from your components. But if you want to push a modal that does not have any props `pushModal('Modal1')` typescript will complain. You will need to do `pushModal('Modal1', {})` (PR's are welcome to fix this 😅)
