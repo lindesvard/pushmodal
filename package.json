@@ -32,18 +32,18 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/DonAdam2/react-rollup-npm-boilerplate.git"
+    "url": "git+https://github.com/lindesvard/pushmodal.git"
   },
   "keywords": [
     "react",
     "button"
   ],
-  "author": "Adam Morsi <adam.morsi@yahoo.com> (https://github.com/DonAdam2)",
+  "author": "Carl Lindesvärd (https://git.new/carl)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/DonAdam2/react-rollup-npm-boilerplate/issues"
+    "url": "https://github.com/lindesvard/pushmodal/issues"
   },
-  "homepage": "https://github.com/DonAdam2/react-rollup-npm-boilerplate#readme",
+  "homepage": "https://git.new/pushmodal",
   "devDependencies": {
     "@babel/core": "7.24.0",
     "@babel/preset-react": "7.23.3",
