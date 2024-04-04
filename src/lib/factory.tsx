@@ -148,11 +148,12 @@ export function createPushModal<T>({ modals }: CreatePushModalOptions<T>) {
     [K in keyof T]: T[K];
     // eslint-disable-next-line @typescript-eslint/ban-types
   } & {};
-  type GetComponentProps<T> = T extends { Component: React.ComponentType<infer P> }
+  type GetComponentProps<T> = T extends
+    | React.ComponentType<infer P>
+    | React.Component<infer P>
+    | { Component: React.ComponentType<infer P> }
     ? P
-    : T extends React.ComponentType<infer P> | React.Component<infer P>
-      ? P
-      : never;
+    : never;
   type IsObject<T> =
     Prettify<T> extends Record<string | number | symbol, unknown> ? Prettify<T> : never;
   type HasKeys<T> = keyof T extends never ? never : T;
