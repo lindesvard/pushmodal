@@ -2,17 +2,12 @@
 
 import React, { Suspense, useEffect, useState } from 'react';
 import mitt from 'mitt';
-import { DialogWrapper } from '../components/wrappers';
-import { WrapperProvider } from '../components/context';
-import { PushModalOptions } from './types';
+import * as Dialog from '@radix-ui/react-dialog';
 
 interface CreatePushModalOptions<T> {
   modals: {
-    [key in keyof T]: PushModalOptions & {
-      Component: React.ComponentType<T[key]>;
-    };
+    [key in keyof T]: React.ComponentType<T[key]>;
   };
-  defaultWrapper?: PushModalOptions['Wrapper'];
 }
 
 interface ControllerProps {
@@ -20,20 +15,15 @@ interface ControllerProps {
   onClosed: () => void;
 }
 
-export function createPushModal<T>({
-  modals,
-  defaultWrapper: DefaultWrapper = DialogWrapper,
-}: CreatePushModalOptions<T>) {
+export function createPushModal<T>({ modals }: CreatePushModalOptions<T>) {
   const emitter = mitt<{
     push: {
       name: ModalRoutes;
       props: Record<string, unknown>;
-      options?: PushModalOptions;
     };
     replace: {
       name: ModalRoutes;
       props: Record<string, unknown>;
-      options?: PushModalOptions;
     };
     pop: { name?: ModalRoutes };
     popAll: undefined;
@@ -46,7 +36,6 @@ export function createPushModal<T>({
     name: ModalRoutes;
     props: Record<string, unknown>;
     state: 'open' | 'closed';
-    options?: PushModalOptions;
   }
 
   function Controller({ children, onClosed }: ControllerProps) {
@@ -61,7 +50,7 @@ export function createPushModal<T>({
     const [state, setState] = useState<StateItem[]>([]);
 
     useEffect(() => {
-      emitter.on('push', ({ name, props, options }) => {
+      emitter.on('push', ({ name, props }) => {
         setState((p) => [
           ...p,
           {
@@ -69,19 +58,17 @@ export function createPushModal<T>({
             name,
             props,
             state: 'open',
-            options,
           },
         ]);
       });
 
-      emitter.on('replace', ({ name, props, options }) => {
+      emitter.on('replace', ({ name, props }) => {
         setState([
           {
             key: Math.random().toString(),
             name,
             props,
             state: 'open',
-            options,
           },
         ]);
       });
@@ -108,42 +95,27 @@ export function createPushModal<T>({
     return (
       <>
         {state.map((item) => {
-          const modal = modals[item.name];
-          const Wrapper = item.options?.Wrapper || modal.Wrapper || DefaultWrapper;
-          const { Component, ...rest } = modal;
+          const Component = modals[item.name];
           return (
-            <WrapperProvider
-              value={{
-                ...rest,
-                ...item.options,
-              }}
+            <Dialog.Root
               key={item.key}
+              open={item.state === 'open'}
+              onOpenChange={() => popModal(item.name)}
+              defaultOpen
             >
-              {(options) => (
-                <Wrapper
-                  key={item.key}
-                  open={item.state === 'open'}
-                  onOpenChange={() => popModal(item.name)}
-                  defaultOpen
-                  onInteractOutside={options.onInteractOutside}
-                  onPointerDownOutside={options.onPointerDownOutside}
-                  onEscapeKeyDown={options.onEscapeKeyDown}
-                >
-                  <Controller
-                    onClosed={() => {
-                      if (item.state === 'closed') {
-                        setState((prev) => {
-                          const match = prev.findIndex((i) => i.key === item.key);
-                          return prev.filter((_, index) => index !== match);
-                        });
-                      }
-                    }}
-                  >
-                    <Component {...(item.props as any)} />
-                  </Controller>
-                </Wrapper>
-              )}
-            </WrapperProvider>
+              <Controller
+                onClosed={() => {
+                  if (item.state === 'closed') {
+                    setState((prev) => {
+                      const match = prev.findIndex((i) => i.key === item.key);
+                      return prev.filter((_, index) => index !== match);
+                    });
+                  }
+                }}
+              >
+                <Component {...(item.props as any)} />
+              </Controller>
+            </Dialog.Root>
           );
         })}
       </>
@@ -155,23 +127,19 @@ export function createPushModal<T>({
     : never;
   type GetDefinedProps<T> = T extends Record<string | number | symbol, unknown> ? T : never;
 
-  const pushModal = <
-    T extends StateItem['name'],
-    B extends GetComponentProps<(typeof modals)[T]['Component']>,
-  >(
+  const pushModal = <T extends StateItem['name'], B extends GetComponentProps<(typeof modals)[T]>>(
     name: T,
     ...args: GetDefinedProps<B> extends never
       ? // No props provided
-        [props?: undefined, options?: PushModalOptions]
+        [props?: undefined]
       : // Props provided
-        [props: B, options?: PushModalOptions]
+        [props: B]
   ) => {
-    const [props, options] = args;
+    const [props] = args;
 
     return emitter.emit('push', {
       name,
       props: props ?? {},
-      options,
     });
   };
 
