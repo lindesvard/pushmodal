@@ -14,7 +14,7 @@ pnpm add pushmodal
 
 ## Usage
 
-1. Create a modal
+#### 1. Create a modal
 
 When creating a dialog/sheet/drawer you need to wrap your component with the `<(Dialog|Sheet|Drawer)Content>` component. But skip the `Root` since we do that for you.
 
@@ -32,7 +32,7 @@ export default function Modal1({ foo }: { foo: string }) {
 ```
 
 
-2. Initialize your modals
+####  2. Initialize your modals
 
 ```tsx
 // file: src/modals/index.tsx (alias '@/modals')
@@ -55,7 +55,7 @@ export const {
     // Longer definition where you can choose what wrapper you want
     // Only needed if you don't want `Dialog.Root` from '@radix-ui/react-dialog'
     // shadcn drawer needs a custom Wrapper
-    DrawerExamle: {
+    DrawerExample: {
       Wrapper: Drawer,
       Component: DrawerExample
     }
@@ -78,7 +78,7 @@ src
 └── ...
 ```
 
-3. Add the `<ModalProvider />` to your root file.
+#### 3. Add the `<ModalProvider />` to your root file.
 
 ```ts
 import { ModalProvider } from '@/modals' 
@@ -94,7 +94,7 @@ export default function App({ children }: { children: React.ReactNode }) {
 }
 ```
 
-4. Use `pushModal`
+#### 4. Use `pushModal`
 
 `pushModal` can have 3 arguments
 
@@ -128,7 +128,7 @@ export default function RandomComponent() {
 }
 ```
 
-4. Closing modals
+#### 4. Closing modals
 
 You can close a modal in three different ways:
 
