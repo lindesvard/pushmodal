@@ -148,21 +148,27 @@ export function createPushModal<T>({
   type GetComponentProps<T> = T extends React.ComponentType<infer P> | React.Component<infer P>
     ? P
     : never;
-  type OrUndefined<T> = T extends Record<string | number | symbol, never> ? undefined : T;
+  type GetDefinedProps<T> = T extends Record<string | number | symbol, unknown> ? T : never;
 
   const pushModal = <
     T extends StateItem['name'],
-    B extends OrUndefined<GetComponentProps<(typeof modals)[T]['Component']>>,
+    B extends GetComponentProps<(typeof modals)[T]['Component']>,
   >(
     name: T,
-    props: B,
-    options?: PushModalOptions
-  ) =>
-    emitter.emit('push', {
+    ...args: GetDefinedProps<B> extends never
+      ? // No props provided
+        [props?: undefined, options?: PushModalOptions]
+      : // Props provided
+        [props: B, options?: PushModalOptions]
+  ) => {
+    const [props, options] = args;
+
+    return emitter.emit('push', {
       name,
       props: props ?? {},
       options,
     });
+  };
 
   // const replaceModal = <
   //   T extends StateItem['name'],
