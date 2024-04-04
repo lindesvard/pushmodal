@@ -5,7 +5,7 @@ import { DialogContent } from '../components/dialog';
 import { Drawer, DrawerContent } from '../components/drawer';
 
 export function FactoryExample() {
-  const { pushModal, popAllModals, ModalProvider } = useMemo(
+  const { pushModal, popAllModals, replaceWithModal, ModalProvider } = useMemo(
     () =>
       createPushModal({
         modals: {
@@ -23,6 +23,12 @@ export function FactoryExample() {
                   onClick={() => pushModal('SheetExample')}
                 >
                   Open Sheet
+                </button>
+                <button
+                  className="bg-black text-white px-4 py-2 rounded-md"
+                  onClick={() => replaceWithModal('SheetExample')}
+                >
+                  Replace with Sheet
                 </button>
                 <button
                   className="bg-black text-white px-4 py-2 rounded-md"
@@ -48,6 +54,12 @@ export function FactoryExample() {
                     onClick={() => pushModal('SheetExample')}
                   >
                     Open Sheet
+                  </button>
+                  <button
+                    className="bg-black text-white px-4 py-2 rounded-md"
+                    onClick={() => replaceWithModal('ModalExample')}
+                  >
+                    Replace with Modal
                   </button>
                 </div>
               </SheetContent>

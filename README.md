@@ -19,10 +19,14 @@ pnpm add pushmodal
 When creating a dialog/sheet/drawer you need to wrap your component with the `<(Dialog|Sheet|Drawer)Content>` component. But skip the `Root` since we do that for you.
 
 ```tsx
-// file: src/modals/modal-1.tsx
-import { DialogContent } from '@/ui/dialog'
+// file: src/modals/modal-example.tsx
+import { DialogContent } from '@/ui/dialog' // shadcn dialog
 
-export default function Modal1({ foo }: { foo: string }) {
+// or any of the below
+// import { SheetContent } from '@/ui/sheet' // shadcn sheet
+// import { DrawerContent } from '@/ui/drawer' // shadcn drawer
+
+export default function ModalExample({ foo }: { foo: string }) {
   return (
     <DialogContent>
       Your modal
@@ -39,12 +43,14 @@ export default function Modal1({ foo }: { foo: string }) {
 import ModalExample from './modal-example'
 import SheetExample from './sheet-example'
 import DrawerExample from './drawer-examle'
-import { createPushModal, SheetWrapper } from 'pushmodal'
+import { createPushModal } from 'pushmodal'
+import { Drawer } from '@/ui/drawer' // shadcn drawer
 
 export const {
   pushModal,
   popModal,
   popAllModals,
+  replaceWithModal,
   ModalProvider
 } = createPushModal({
   modals: {
@@ -96,31 +102,24 @@ export default function App({ children }: { children: React.ReactNode }) {
 
 #### 4. Use `pushModal`
 
-`pushModal` can have 3 arguments
+`pushModal` can have 1-2 arguments
 
 1. `name` - name of your modal 
-2. `props` - props for your specific modal, types are infered from your component!
+2. `props` (might be optional) - props for your modal, types are infered from your component!
 
 ```tsx
-import { SheetWrapper } from 'pushmodal'
 import { pushModal } from '@/modals' 
 
 export default function RandomComponent() {
   return (
     <div>
-      <button onClick={() => {
-        pushModal('ModalExample', { foo: 'string' })
-      }}>
+      <button onClick={() =>  pushModal('ModalExample', { foo: 'string' })}>
         Open modal
       </button>
-      <button onClick={() => {
-        pushModal('SheetExample')
-      }}>
+      <button onClick={() => pushModal('SheetExample')}>
         Open Sheet
       </button>
-      <button onClick={() => {
-        pushModal('DrawerExample')
-      }}>
+      <button onClick={() => pushModal('DrawerExample')}>
         Open Drawer
       </button>
     </div>
@@ -135,6 +134,14 @@ You can close a modal in three different ways:
 - `popModal()` - will pop the last added modal
 - `popModal('Modal1')` - will pop the last added modal with name `Modal1`
 - `popAllModals()` - will close all your modals
+
+#### 5. Replacing current modal
+
+Replace the last pushed modal. Same interface as `pushModal`.
+
+```ts
+replaceWithModal('SheetExample', { /* Props if any */ })
+```
 
 ## Contributors
 

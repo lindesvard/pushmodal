@@ -26,6 +26,7 @@ interface ControllerProps {
 }
 
 export function createPushModal<T>({ modals }: CreatePushModalOptions<T>) {
+  let lastModal: null | keyof T = null;
   const emitter = mitt<{
     push: {
       name: ModalRoutes;
@@ -60,6 +61,9 @@ export function createPushModal<T>({ modals }: CreatePushModalOptions<T>) {
     const [state, setState] = useState<StateItem[]>([]);
 
     useEffect(() => {
+      if (state.length === 0) {
+        lastModal = null;
+      }
       emitter.on('push', ({ name, props }) => {
         setState((p) => [
           ...p,
@@ -154,29 +158,39 @@ export function createPushModal<T>({ modals }: CreatePushModalOptions<T>) {
         [props: B]
   ) => {
     const [props] = args;
-
+    lastModal = name;
     return emitter.emit('push', {
       name,
       props: props ?? {},
     });
   };
 
-  // const replaceModal = <
-  //   T extends StateItem['name'],
-  //   B extends OrUndefined<GetComponentProps<(typeof modals)[T]['Component']>>,
-  // >(
-  //   name: T,
-  //   ...rest: B extends undefined ? [] : [B]
-  // ) =>
-  //   emitter.emit('replace', {
-  //     name,
-  //     props: Array.isArray(rest) && rest[0] ? rest[0] : {},
-  //   });
-
   const popModal = (name?: StateItem['name']) =>
     emitter.emit('pop', {
       name,
     });
+
+  const replaceWithModal = <
+    T extends StateItem['name'],
+    B extends GetComponentProps<(typeof modals)[T]>,
+  >(
+    name: T,
+    ...args: GetDefinedProps<B> extends never
+      ? // No props provided
+        [props?: undefined]
+      : // Props provided
+        [props: B]
+  ) => {
+    const [props] = args;
+    emitter.emit('push', {
+      name,
+      props: props ?? {},
+    });
+    if (lastModal) {
+      popModal(lastModal);
+    }
+    lastModal = name;
+  };
 
   const popAllModals = () => emitter.emit('popAll');
 
@@ -185,6 +199,6 @@ export function createPushModal<T>({ modals }: CreatePushModalOptions<T>) {
     pushModal,
     popModal,
     popAllModals,
-    // replaceModal,
+    replaceWithModal,
   };
 }
