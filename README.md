@@ -143,6 +143,19 @@ Replace the last pushed modal. Same interface as `pushModal`.
 replaceWithModal('SheetExample', { /* Props if any */ })
 ```
 
+## Issues / Limitations
+
+- Use `type` instead of `interface` since we cannot infer the props from you modal! *Not sure why this is...*
+
+```ts
+// BAD
+interface MyModalProps {
+  bar: string
+}
+// GOOD
+type MyModalProps = { bar: string }
+```
+
 ## Contributors
 
 - [lindesvard](https://github.com/lindesvard)
