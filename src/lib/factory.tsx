@@ -144,9 +144,13 @@ export function createPushModal<T>({ modals }: CreatePushModalOptions<T>) {
     );
   }
 
-  type GetComponentProps<T> = T extends React.ComponentType<infer P> | React.Component<infer P>
-    ? P
-    : never;
+  type GetComponentProps<T> = T extends { Component: React.ComponentType<infer P> }
+    ? T extends { Component: React.ComponentType<infer P2> }
+      ? P2
+      : never
+    : T extends React.ComponentType<infer P> | React.Component<infer P>
+      ? P
+      : never;
   type GetDefinedProps<T> = T extends Record<string | number | symbol, unknown> ? T : never;
 
   const pushModal = <T extends StateItem['name'], B extends GetComponentProps<(typeof modals)[T]>>(

@@ -69,6 +69,10 @@ export function FactoryExample() {
             Component: () => <DrawerContent>Drawer</DrawerContent>,
             Wrapper: Drawer,
           },
+          DrawerExampleWithProps: {
+            Component: ({ int }: { int: number }) => <DrawerContent>Drawer</DrawerContent>,
+            Wrapper: Drawer,
+          },
           WithProps: (props: { num: number; str: string; bool: boolean }) => (
             <DialogContent>
               <pre>{JSON.stringify(props, null, 2)}</pre>
@@ -78,6 +82,33 @@ export function FactoryExample() {
       }),
     []
   );
+
+  // This will never happen, just testing types
+  if (!ModalProvider) {
+    // eslint-disable-next-line
+    // @ts-expect-error
+    pushModal('DrawerExampleWithProps');
+
+    pushModal('DrawerExampleWithProps', {
+      int: 1,
+    });
+
+    pushModal('DrawerExample');
+
+    pushModal('ModalExample');
+
+    pushModal('SheetExample');
+
+    // eslint-disable-next-line
+    // @ts-expect-error
+    pushModal('WithProps');
+
+    pushModal('WithProps', {
+      num: 1,
+      str: 'string',
+      bool: true,
+    });
+  }
 
   return (
     <div>
