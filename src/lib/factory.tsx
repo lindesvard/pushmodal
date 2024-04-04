@@ -3,19 +3,16 @@
 import React, { Suspense, useEffect, useState } from 'react';
 import mitt from 'mitt';
 import { DialogWrapper } from '../components/wrappers';
+import { WrapperProvider } from '../components/context';
+import { PushModalOptions } from './types';
 
 interface CreatePushModalOptions<T> {
   modals: {
-    [key in keyof T]: {
+    [key in keyof T]: PushModalOptions & {
       Component: React.ComponentType<T[key]>;
-      Wrapper?: typeof DialogWrapper;
     };
   };
-  defaultWrapper?: typeof DialogWrapper;
-}
-
-interface PushModalOptions {
-  Wrapper?: typeof DialogWrapper;
+  defaultWrapper?: PushModalOptions['Wrapper'];
 }
 
 interface ControllerProps {
@@ -39,6 +36,7 @@ export function createPushModal<T>({
       options?: PushModalOptions;
     };
     pop: { name?: ModalRoutes };
+    popAll: undefined;
   }>();
 
   type ModalRoutes = keyof typeof modals;
@@ -61,17 +59,6 @@ export function createPushModal<T>({
 
   function ModalProvider() {
     const [state, setState] = useState<StateItem[]>([]);
-
-    useEffect(() => {
-      document.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape' && state.length > 0) {
-          setState((p) => {
-            p.pop();
-            return [...p];
-          });
-        }
-      });
-    }, [state]);
 
     useEffect(() => {
       emitter.on('push', ({ name, props, options }) => {
@@ -112,33 +99,51 @@ export function createPushModal<T>({
         });
       });
 
+      emitter.on('popAll', () => {
+        setState((items) => items.map((item) => ({ ...item, state: 'closed' })));
+      });
+
       return () => emitter.all.clear();
     });
     return (
       <>
         {state.map((item) => {
-          const { Component, ...options } = modals[item.name];
-          const Wrapper = item.options?.Wrapper || options.Wrapper || DefaultWrapper;
+          const modal = modals[item.name];
+          const Wrapper = item.options?.Wrapper || modal.Wrapper || DefaultWrapper;
+          const { Component, ...rest } = modal;
           return (
-            <Wrapper
+            <WrapperProvider
+              value={{
+                ...rest,
+                ...item.options,
+              }}
               key={item.key}
-              open={item.state === 'open'}
-              onOpenChange={() => popModal(item.name)}
-              defaultOpen
             >
-              <Controller
-                onClosed={() => {
-                  if (item.state === 'closed') {
-                    setState((prev) => {
-                      const match = prev.findIndex((i) => i.key === item.key);
-                      return prev.filter((_, index) => index !== match);
-                    });
-                  }
-                }}
-              >
-                <Component {...(item.props as any)} />
-              </Controller>
-            </Wrapper>
+              {(options) => (
+                <Wrapper
+                  key={item.key}
+                  open={item.state === 'open'}
+                  onOpenChange={() => popModal(item.name)}
+                  defaultOpen
+                  onInteractOutside={options.onInteractOutside}
+                  onPointerDownOutside={options.onPointerDownOutside}
+                  onEscapeKeyDown={options.onEscapeKeyDown}
+                >
+                  <Controller
+                    onClosed={() => {
+                      if (item.state === 'closed') {
+                        setState((prev) => {
+                          const match = prev.findIndex((i) => i.key === item.key);
+                          return prev.filter((_, index) => index !== match);
+                        });
+                      }
+                    }}
+                  >
+                    <Component {...(item.props as any)} />
+                  </Controller>
+                </Wrapper>
+              )}
+            </WrapperProvider>
           );
         })}
       </>
@@ -187,10 +192,13 @@ export function createPushModal<T>({
       name,
     });
 
+  const popAllModals = () => emitter.emit('popAll');
+
   return {
     ModalProvider,
     pushModal,
     popModal,
+    popAllModals,
     // replaceModal,
   };
 }
