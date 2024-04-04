@@ -2,13 +2,15 @@
 
 Make life easier handling dialogs, sheets and drawers for shadcn.
 
+> this package is not stable yet 🫣 **Breaking change from `0.0.5` -> `0.0.6`**
+
 ## Installation 
 
 ```bash
 pnpm add pushmodal
 ```
 
-> We take for granted that you already have `@radix-ui/react-dialog` installed. If not, install it as well!
+> We take for granted that you already have `@radix-ui/react-dialog` installed. If not ➡️ `pnpm add @radix-ui/react-dialog`
 
 ## Usage
 
@@ -34,8 +36,9 @@ export default function Modal1({ foo }: { foo: string }) {
 
 ```tsx
 // file: src/modals/index.tsx (alias '@/modals')
-import Modal1 from './modal-1'
-import Modal2 from './modal-2'
+import ModalExample from './modal-example'
+import SheetExample from './sheet-example'
+import DrawerExample from './drawer-examle'
 import { createPushModal, SheetWrapper } from 'pushmodal'
 
 export const {
@@ -45,8 +48,17 @@ export const {
   ModalProvider
 } = createPushModal({
   modals: {
-    Modal1,
-    Modal2,
+    // Short hand
+    ModalExample,
+    SheetExample,
+
+    // Longer definition where you can choose what wrapper you want
+    // Only needed if you don't want `Dialog.Root` from '@radix-ui/react-dialog'
+    // shadcn drawer needs a custom Wrapper
+    DrawerExamle: {
+      Wrapper: Drawer,
+      Component: DrawerExample
+    }
   },
 })
 ```
@@ -57,19 +69,16 @@ How we usually structure things
 src
 ├── ...
 ├── modals
-│   ├── modal-1.tsx
-│   ├── modal-2.tsx
-│   ├── modal-3.tsx
-│   ├── modal-4.tsx
-│   ├── modal-5.tsx
-│   ├── modal-6.tsx
+│   ├── modal-example.tsx
+│   ├── sheet-example.tsx
+│   ├── drawer-examle.tsx
+│   ├── ... more modals here ...
 │   └── index.tsx
 ├── ...
 └── ...
-
 ```
 
-2. Add the `<ModalProvider />` to your root file.
+3. Add the `<ModalProvider />` to your root file.
 
 ```ts
 import { ModalProvider } from '@/modals' 
@@ -85,11 +94,11 @@ export default function App({ children }: { children: React.ReactNode }) {
 }
 ```
 
-3. Use `pushModal`
+4. Use `pushModal`
 
 `pushModal` can have 3 arguments
 
-1. `name` - name of your modal
+1. `name` - name of your modal 
 2. `props` - props for your specific modal, types are infered from your component!
 
 ```tsx
@@ -100,9 +109,19 @@ export default function RandomComponent() {
   return (
     <div>
       <button onClick={() => {
-        pushModal('Modal1', { foo: 'string' })
+        pushModal('ModalExample', { foo: 'string' })
       }}>
         Open modal
+      </button>
+      <button onClick={() => {
+        pushModal('SheetExample')
+      }}>
+        Open Sheet
+      </button>
+      <button onClick={() => {
+        pushModal('DrawerExample')
+      }}>
+        Open Drawer
       </button>
     </div>
   )
@@ -111,7 +130,7 @@ export default function RandomComponent() {
 
 4. Closing modals
 
-You can close modals on three different ways
+You can close a modal in three different ways:
 
 - `popModal()` - will pop the last added modal
 - `popModal('Modal1')` - will pop the last added modal with name `Modal1`

@@ -6,7 +6,17 @@ import * as Dialog from '@radix-ui/react-dialog';
 
 interface CreatePushModalOptions<T> {
   modals: {
-    [key in keyof T]: React.ComponentType<T[key]>;
+    [key in keyof T]:
+      | {
+          Wrapper: React.ComponentType<{
+            open: boolean;
+            onOpenChange: (open?: boolean) => void;
+            children: React.ReactNode;
+            defaultOpen?: boolean;
+          }>;
+          Component: React.ComponentType<T[key]>;
+        }
+      | React.ComponentType<T[key]>;
   };
 }
 
@@ -95,12 +105,20 @@ export function createPushModal<T>({ modals }: CreatePushModalOptions<T>) {
     return (
       <>
         {state.map((item) => {
-          const Component = modals[item.name];
+          const modal = modals[item.name];
+          const Component =
+            'Component' in modal ? modal.Component : (modal as React.ComponentType<unknown>);
+          const Root = 'Wrapper' in modal ? modal.Wrapper : Dialog.Root;
+
           return (
-            <Dialog.Root
+            <Root
               key={item.key}
               open={item.state === 'open'}
-              onOpenChange={() => popModal(item.name)}
+              onOpenChange={(isOpen) => {
+                if (!isOpen) {
+                  popModal(item.name);
+                }
+              }}
               defaultOpen
             >
               <Controller
@@ -115,7 +133,7 @@ export function createPushModal<T>({ modals }: CreatePushModalOptions<T>) {
               >
                 <Component {...(item.props as any)} />
               </Controller>
-            </Dialog.Root>
+            </Root>
           );
         })}
       </>
