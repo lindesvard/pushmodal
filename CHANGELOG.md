@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.8](https://github.com/lindesvard/pushmodal/compare/v0.0.7...v0.0.8) (2024-04-05)
+
+
+### Features
+
+* allow interface + remove second param(props) if component does not require props ([3416efb](https://github.com/lindesvard/pushmodal/commit/3416efbab41e2264e53d157d96cf09a71029e919))
+
 ### [0.0.7](https://github.com/lindesvard/pushmodal/compare/v0.0.6...v0.0.7) (2024-04-04)
 
 ### [0.0.6](https://github.com/lindesvard/pushmodal/compare/v0.0.5...v0.0.6) (2024-04-04)
