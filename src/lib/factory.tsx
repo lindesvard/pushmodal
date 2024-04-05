@@ -144,20 +144,28 @@ export function createPushModal<T>({ modals }: CreatePushModalOptions<T>) {
     );
   }
 
-  type GetComponentProps<T> = T extends { Component: React.ComponentType<infer P> }
-    ? T extends { Component: React.ComponentType<infer P2> }
-      ? P2
-      : never
-    : T extends React.ComponentType<infer P> | React.Component<infer P>
-      ? P
-      : never;
-  type GetDefinedProps<T> = T extends Record<string | number | symbol, unknown> ? T : never;
+  type Prettify<T> = {
+    [K in keyof T]: T[K];
+    // eslint-disable-next-line @typescript-eslint/ban-types
+  } & {};
+  type GetComponentProps<T> = T extends
+    | React.ComponentType<infer P>
+    | React.Component<infer P>
+    | { Component: React.ComponentType<infer P> }
+    ? P
+    : never;
+  type IsObject<T> =
+    Prettify<T> extends Record<string | number | symbol, unknown> ? Prettify<T> : never;
+  type HasKeys<T> = keyof T extends never ? never : T;
 
-  const pushModal = <T extends StateItem['name'], B extends GetComponentProps<(typeof modals)[T]>>(
+  const pushModal = <
+    T extends StateItem['name'],
+    B extends Prettify<GetComponentProps<(typeof modals)[T]>>,
+  >(
     name: T,
-    ...args: GetDefinedProps<B> extends never
+    ...args: HasKeys<IsObject<B>> extends never
       ? // No props provided
-        [props?: undefined]
+        []
       : // Props provided
         [props: B]
   ) => {
@@ -179,9 +187,9 @@ export function createPushModal<T>({ modals }: CreatePushModalOptions<T>) {
     B extends GetComponentProps<(typeof modals)[T]>,
   >(
     name: T,
-    ...args: GetDefinedProps<B> extends never
+    ...args: HasKeys<IsObject<B>> extends never
       ? // No props provided
-        [props?: undefined]
+        []
       : // Props provided
         [props: B]
   ) => {
