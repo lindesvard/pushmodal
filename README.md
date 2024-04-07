@@ -2,8 +2,6 @@
 
 Make life easier handling dialogs, sheets and drawers for shadcn.
 
-> this package is not stable yet 🫣 **Breaking change from `0.0.5` -> `0.0.6`**
-
 ## Installation 
 
 ```bash
