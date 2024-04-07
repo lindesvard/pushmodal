@@ -1,6 +1,6 @@
-# pushmodal
-
-Make life easier handling dialogs, sheets and drawers for shadcn.
+![hero](github.png)
+<br />
+<br />
 
 ## Installation 
 
