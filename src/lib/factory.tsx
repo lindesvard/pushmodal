@@ -1,7 +1,7 @@
 'use client';
 
 import React, { Suspense, useEffect, useState } from 'react';
-import mitt from 'mitt';
+import mitt, { Handler } from 'mitt';
 import * as Dialog from '@radix-ui/react-dialog';
 
 interface CreatePushModalOptions<T> {
@@ -20,92 +20,125 @@ interface CreatePushModalOptions<T> {
   };
 }
 
-interface ControllerProps {
-  children: React.ReactNode;
-  onClosed: () => void;
-}
-
 export function createPushModal<T>({ modals }: CreatePushModalOptions<T>) {
-  let lastModal: null | keyof T = null;
-  const emitter = mitt<{
+  type Modals = typeof modals;
+  type ModalKeys = keyof Modals;
+
+  type EventHandlers = {
+    change: { name: ModalKeys; open: boolean; props: Record<string, unknown> };
     push: {
-      name: ModalRoutes;
+      name: ModalKeys;
       props: Record<string, unknown>;
     };
     replace: {
-      name: ModalRoutes;
+      name: ModalKeys;
       props: Record<string, unknown>;
     };
-    pop: { name?: ModalRoutes };
+    pop: { name?: ModalKeys };
     popAll: undefined;
-  }>();
-
-  type ModalRoutes = keyof typeof modals;
+  };
 
   interface StateItem {
     key: string;
-    name: ModalRoutes;
+    name: ModalKeys;
     props: Record<string, unknown>;
-    state: 'open' | 'closed';
+    open: boolean;
+    closedAt?: number;
   }
 
-  function Controller({ children, onClosed }: ControllerProps) {
-    useEffect(() => {
-      return () => onClosed();
-    }, [onClosed]);
+  const filterGarbage = (item: StateItem): boolean => {
+    if (item.open || !item.closedAt) {
+      return true;
+    }
+    return Date.now() - item.closedAt < 500;
+  };
 
-    return <Suspense>{children}</Suspense>;
-  }
+  const emitter = mitt<EventHandlers>();
 
   function ModalProvider() {
     const [state, setState] = useState<StateItem[]>([]);
 
     useEffect(() => {
-      if (state.length === 0) {
-        lastModal = null;
-      }
-      emitter.on('push', ({ name, props }) => {
-        setState((p) => [
-          ...p,
-          {
-            key: Math.random().toString(),
-            name,
-            props,
-            state: 'open',
-          },
-        ]);
-      });
+      const pushHandler: Handler<EventHandlers['push']> = ({ name, props }) => {
+        emitter.emit('change', { name, open: true, props });
+        setState((p) =>
+          [
+            ...p,
+            {
+              key: Math.random().toString(),
+              name,
+              props,
+              open: true,
+            },
+          ].filter(filterGarbage)
+        );
+      };
+      const replaceHandler: Handler<EventHandlers['replace']> = ({ name, props }) => {
+        setState((p) => {
+          // find last item to replace
+          const last = p.findLast((item) => item.open);
+          if (last) {
+            // if found emit close event
+            emitter.emit('change', { name: last.name, open: false, props: last.props });
+          }
+          emitter.emit('change', { name, open: true, props });
 
-      emitter.on('replace', ({ name, props }) => {
-        setState([
-          {
-            key: Math.random().toString(),
-            name,
-            props,
-            state: 'open',
-          },
-        ]);
-      });
+          return [
+            // 1) close last item 2) filter garbage 3) add new item
+            ...p
+              .map((item) => {
+                if (item.key === last?.key) {
+                  return { ...item, open: false, closedAt: Date.now() };
+                }
+                return item;
+              })
+              .filter(filterGarbage),
+            {
+              key: Math.random().toString(),
+              name,
+              props,
+              open: true,
+            },
+          ];
+        });
+      };
 
-      emitter.on('pop', ({ name }) => {
+      const popHandler: Handler<EventHandlers['pop']> = ({ name }) => {
         setState((items) => {
-          const match =
+          // Find last index
+          const index =
             name === undefined
               ? // Pick last item if no name is provided
                 items.length - 1
-              : items.findLastIndex((item) => item.name === name);
-          return items.map((item, index) =>
-            index !== match ? item : { ...item, state: 'closed' }
+              : items.findLastIndex((item) => item.name === name && item.open);
+          const match = items[index];
+          if (match) {
+            emitter.emit('change', {
+              name: match.name,
+              open: false,
+              props: match.props,
+            });
+          }
+          return items.map((item) =>
+            match?.key !== item.key ? item : { ...item, open: false, closedAt: Date.now() }
           );
         });
-      });
+      };
 
-      emitter.on('popAll', () => {
-        setState((items) => items.map((item) => ({ ...item, state: 'closed' })));
-      });
-
-      return () => emitter.all.clear();
-    });
+      const popAllHandler: Handler<EventHandlers['popAll']> = () => {
+        setState((items) => items.map((item) => ({ ...item, open: false, closedAt: Date.now() })));
+      };
+      emitter.on('push', pushHandler);
+      emitter.on('replace', replaceHandler);
+      emitter.on('pop', popHandler);
+      emitter.on('popAll', popAllHandler);
+      return () => {
+        emitter.off('push', pushHandler);
+        emitter.off('replace', replaceHandler);
+        emitter.off('pop', popHandler);
+        emitter.off('popAll', popAllHandler);
+      };
+    }, [state.length]);
     return (
       <>
         {state.map((item) => {
@@ -117,7 +150,7 @@ export function createPushModal<T>({ modals }: CreatePushModalOptions<T>) {
           return (
             <Root
               key={item.key}
-              open={item.state === 'open'}
+              open={item.open}
               onOpenChange={(isOpen) => {
                 if (!isOpen) {
                   popModal(item.name);
@@ -125,18 +158,9 @@ export function createPushModal<T>({ modals }: CreatePushModalOptions<T>) {
               }}
               defaultOpen
             >
-              <Controller
-                onClosed={() => {
-                  if (item.state === 'closed') {
-                    setState((prev) => {
-                      const match = prev.findIndex((i) => i.key === item.key);
-                      return prev.filter((_, index) => index !== match);
-                    });
-                  }
-                }}
-              >
+              <Suspense>
                 <Component {...(item.props as any)} />
-              </Controller>
+              </Suspense>
             </Root>
           );
         })}
@@ -158,10 +182,7 @@ export function createPushModal<T>({ modals }: CreatePushModalOptions<T>) {
     Prettify<T> extends Record<string | number | symbol, unknown> ? Prettify<T> : never;
   type HasKeys<T> = keyof T extends never ? never : T;
 
-  const pushModal = <
-    T extends StateItem['name'],
-    B extends Prettify<GetComponentProps<(typeof modals)[T]>>,
-  >(
+  const pushModal = <T extends StateItem['name'], B extends Prettify<GetComponentProps<Modals[T]>>>(
     name: T,
     ...args: HasKeys<IsObject<B>> extends never
       ? // No props provided
@@ -170,7 +191,6 @@ export function createPushModal<T>({ modals }: CreatePushModalOptions<T>) {
         [props: B]
   ) => {
     const [props] = args;
-    lastModal = name;
     return emitter.emit('push', {
       name,
       props: props ?? {},
@@ -182,10 +202,7 @@ export function createPushModal<T>({ modals }: CreatePushModalOptions<T>) {
       name,
     });
 
-  const replaceWithModal = <
-    T extends StateItem['name'],
-    B extends GetComponentProps<(typeof modals)[T]>,
-  >(
+  const replaceWithModal = <T extends StateItem['name'], B extends GetComponentProps<Modals[T]>>(
     name: T,
     ...args: HasKeys<IsObject<B>> extends never
       ? // No props provided
@@ -194,17 +211,31 @@ export function createPushModal<T>({ modals }: CreatePushModalOptions<T>) {
         [props: B]
   ) => {
     const [props] = args;
-    emitter.emit('push', {
+    emitter.emit('replace', {
       name,
       props: props ?? {},
     });
-    if (lastModal) {
-      popModal(lastModal);
-    }
-    lastModal = name;
   };
 
   const popAllModals = () => emitter.emit('popAll');
+
+  type EventCallback<T extends ModalKeys> = (
+    open: boolean,
+    props: GetComponentProps<Modals[T]>,
+    name?: T
+  ) => void;
+
+  const onPushModal = <T extends ModalKeys>(name: T | '*', callback: EventCallback<T>) => {
+    const fn: Handler<EventHandlers['change']> = (payload) => {
+      if (payload.name === name) {
+        callback(payload.open, payload.props as GetComponentProps<Modals[T]>, payload.name as T);
+      } else if (name === '*') {
+        callback(payload.open, payload.props as any, payload.name as T);
+      }
+    };
+    emitter.on('change', fn);
+    return () => emitter.off('change', fn);
+  };
 
   return {
     ModalProvider,
@@ -212,5 +243,11 @@ export function createPushModal<T>({ modals }: CreatePushModalOptions<T>) {
     popModal,
     popAllModals,
     replaceWithModal,
+    onPushModal,
+    useOnPushModal: <T extends ModalKeys>(name: T | '*', callback: EventCallback<T>) => {
+      useEffect(() => {
+        return onPushModal(name, callback);
+      }, [name, callback]);
+    },
   };
 }

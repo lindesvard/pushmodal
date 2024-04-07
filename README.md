@@ -51,6 +51,8 @@ export const {
   popModal,
   popAllModals,
   replaceWithModal,
+  useOnPushModal,
+  onPushModal,
   ModalProvider
 } = createPushModal({
   modals: {
@@ -141,6 +143,49 @@ Replace the last pushed modal. Same interface as `pushModal`.
 
 ```ts
 replaceWithModal('SheetExample', { /* Props if any */ })
+```
+
+#### 6. Using events
+
+You can listen to events with `useOnPushModal` (inside react component) or `onPushModal` (or globally).
+
+The event recieve the state of the modal (open/closed), the modals name and props. You can listen to all modal changes with `*` or provide a name of the modal you want to listen on.
+
+**Inside a component**
+
+```tsx
+import { useCallback } from 'react'
+import { useOnPushModal } from '@/modals'
+
+// file: a-react-component.tsx
+export default function ReactComponent() {
+  // listen to any modal open/close
+  useOnPushModal('*', 
+    useCallback((open, props, name) => {
+      console.log('is open?', open);
+      console.log('props from component', props);
+      console.log('name', name);
+    }, [])
+  )
+  
+  // listen to `ModalExample` open/close
+  useOnPushModal('ModalExample', 
+    useCallback((open, props) => {
+      console.log('is `ModalExample` open?', open);
+      console.log('props for ModalExample', props);
+    }, [])
+  )
+}
+```
+
+**Globally**
+
+```ts
+import { onPushModal } from '@/modals'
+
+const unsub = onPushModal('*', (open, props, name) => {
+  // do stuff
+})
 ```
 
 ## Issues / Limitations
