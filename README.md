@@ -147,7 +147,7 @@ replaceWithModal('SheetExample', { /* Props if any */ })
 
 You can listen to events with `useOnPushModal` (inside react component) or `onPushModal` (or globally).
 
-The event recieve the state of the modal (open/closed), the modals name and props. You can listen to all modal changes with `*` or provide a name of the modal you want to listen on.
+The event receive the state of the modal (open/closed), the modals name and props. You can listen to all modal changes with `*` or provide a name of the modal you want to listen on.
 
 **Inside a component**
 
