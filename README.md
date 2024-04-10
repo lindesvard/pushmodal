@@ -176,6 +176,62 @@ export default function ReactComponent() {
 }
 ```
 
+#### Responsive rendering (mobile/desktop)
+
+In some cases you want to show a drawer on mobile and a dialog on desktop. This is possible and we have created a helper function to get you going faster. `createResponsiveWrapper` 💪 
+
+```tsx
+// path: src/modals/dynamic.tsx
+import { createResponsiveWrapper } from 'pushmodal'
+import { Dialog, DialogContent } from '@/ui/dialog'; // shadcn dialog
+import { Drawer, DrawerContent } from '@/ui/drawer'; // shadcn drawer
+
+export default createResponsiveWrapper({
+  desktop: {
+    Wrapper: Dialog,
+    Content: DialogContent,
+  },
+  mobile: {
+    Wrapper: Drawer,
+    Content: DrawerContent,
+  },
+  breakpoint: 640,
+});
+
+// path: src/modals/your-modal.tsx
+import * as Dynamic from './dynamic'
+
+export default function YourModal() {
+  return (
+    <Dynamic.Content>
+      Drawer in mobile and dialog on desktop 🤘
+    </Dynamic.Content>
+  )
+}
+
+// path: src/modals/index.ts
+import * as Dynamic from './dynamic'
+import YourModal from './your-modal'
+import { createPushModal } from 'pushmodal'
+
+export const {
+  pushModal,
+  popModal,
+  popAllModals,
+  replaceWithModal,
+  useOnPushModal,
+  onPushModal,
+  ModalProvider
+} = createPushModal({
+  modals: {
+    YourModal: {
+      Wrapper: Dynamic.Wrapper,
+      Component: YourModal
+    }
+  },
+})
+```
+
 **Globally**
 
 ```ts

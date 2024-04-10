@@ -1,8 +1,20 @@
-import { createPushModal } from './factory';
+import { createPushModal, createResponsiveWrapper } from '../';
 import { SheetContent } from '../components/sheet';
-import { DialogContent } from '../components/dialog';
+import { Dialog, DialogContent } from '../components/dialog';
 import { Drawer, DrawerContent } from '../components/drawer';
 import { useEffect } from 'react';
+
+const Responsive = createResponsiveWrapper({
+  desktop: {
+    Wrapper: Dialog,
+    Content: DialogContent,
+  },
+  mobile: {
+    Wrapper: Drawer,
+    Content: DrawerContent,
+  },
+  breakpoint: 640,
+});
 
 const { onPushModal, useOnPushModal, pushModal, popAllModals, replaceWithModal, ModalProvider } =
   createPushModal({
@@ -76,6 +88,14 @@ const { onPushModal, useOnPushModal, pushModal, popAllModals, replaceWithModal, 
           <pre>{JSON.stringify(props, null, 2)}</pre>
         </DialogContent>
       ),
+      Dynamic: {
+        Component: () => (
+          <Responsive.Content>
+            Dynamic modal (Drawer on mobile and Dialog on desktop)
+          </Responsive.Content>
+        ),
+        Wrapper: Responsive.Wrapper,
+      },
     },
   });
 
@@ -146,6 +166,12 @@ export function FactoryExample() {
           onClick={() => pushModal('DrawerExample')}
         >
           Open Drawer
+        </button>
+        <button
+          className="bg-black text-white px-4 py-2 rounded-md"
+          onClick={() => pushModal('Dynamic')}
+        >
+          Open Dyanmic (Drawer on mobile, Dialog on desktop)
         </button>
         <button
           className="bg-black text-white px-4 py-2 rounded-md"
