@@ -50,13 +50,31 @@ export function createPushModal<T>({ modals }: CreatePushModalOptions<T>) {
     if (item.open || !item.closedAt) {
       return true;
     }
-    return Date.now() - item.closedAt < 500;
+    return Date.now() - item.closedAt < 300;
   };
 
   const emitter = mitt<EventHandlers>();
 
   function ModalProvider() {
     const [state, setState] = useState<StateItem[]>([]);
+
+    // Run this to ensure we remove closed modals from the state
+    // Otherwise the unmount in useEffect will not be triggered until the next modal is opened
+    useEffect(() => {
+      const hasClosedModals = state.some((item) => typeof item.closedAt === 'number');
+      let timer: NodeJS.Timeout | undefined;
+      if (hasClosedModals) {
+        timer = setInterval(() => {
+          setState((p) => [...p.filter(filterGarbage)]);
+        }, 100);
+      } else {
+        clearInterval(timer);
+      }
+
+      return () => {
+        clearInterval(timer);
+      };
+    }, [state]);
 
     useEffect(() => {
       const pushHandler: Handler<EventHandlers['push']> = ({ name, props }) => {

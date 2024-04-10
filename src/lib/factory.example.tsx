@@ -19,36 +19,44 @@ const Responsive = createResponsiveWrapper({
 const { onPushModal, useOnPushModal, pushModal, popAllModals, replaceWithModal, ModalProvider } =
   createPushModal({
     modals: {
-      ModalExample: () => (
-        <DialogContent>
-          <div className="flex gap-4">
-            <button
-              className="bg-black text-white px-4 py-2 rounded-md"
-              onClick={() => pushModal('ModalExample')}
-            >
-              Open Modal
-            </button>
-            <button
-              className="bg-black text-white px-4 py-2 rounded-md"
-              onClick={() => pushModal('SheetExample')}
-            >
-              Open Sheet
-            </button>
-            <button
-              className="bg-black text-white px-4 py-2 rounded-md"
-              onClick={() => replaceWithModal('SheetExample')}
-            >
-              Replace with Sheet
-            </button>
-            <button
-              className="bg-black text-white px-4 py-2 rounded-md"
-              onClick={() => popAllModals()}
-            >
-              Close all!
-            </button>
-          </div>
-        </DialogContent>
-      ),
+      ModalExample: () => {
+        useEffect(() => {
+          console.log('Mount ModalExample');
+          return () => {
+            console.log('Unmount ModalExample');
+          };
+        }, []);
+        return (
+          <DialogContent>
+            <div className="flex gap-4">
+              <button
+                className="bg-black text-white px-4 py-2 rounded-md"
+                onClick={() => pushModal('ModalExample')}
+              >
+                Open Modal
+              </button>
+              <button
+                className="bg-black text-white px-4 py-2 rounded-md"
+                onClick={() => pushModal('SheetExample')}
+              >
+                Open Sheet
+              </button>
+              <button
+                className="bg-black text-white px-4 py-2 rounded-md"
+                onClick={() => replaceWithModal('SheetExample')}
+              >
+                Replace with Sheet
+              </button>
+              <button
+                className="bg-black text-white px-4 py-2 rounded-md"
+                onClick={() => popAllModals()}
+              >
+                Close all!
+              </button>
+            </div>
+          </DialogContent>
+        );
+      },
       SheetExample: () => {
         return (
           <SheetContent>
