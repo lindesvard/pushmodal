@@ -176,6 +176,16 @@ export default function ReactComponent() {
 }
 ```
 
+**Globally**
+
+```ts
+import { onPushModal } from '@/modals'
+
+const unsub = onPushModal('*', (open, props, name) => {
+  // do stuff
+})
+```
+
 #### Responsive rendering (mobile/desktop)
 
 In some cases you want to show a drawer on mobile and a dialog on desktop. This is possible and we have created a helper function to get you going faster. `createResponsiveWrapper` 💪 
@@ -229,16 +239,6 @@ export const {
       Component: YourModal
     }
   },
-})
-```
-
-**Globally**
-
-```ts
-import { onPushModal } from '@/modals'
-
-const unsub = onPushModal('*', (open, props, name) => {
-  // do stuff
 })
 ```
 
