@@ -1,6 +1,6 @@
 {
   "name": "pushmodal",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Handle shadcn dialog, sheet and drawer with ease",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
