@@ -22,19 +22,20 @@ export function createResponsiveWrapper({ mobile, desktop, breakpoint = 640 }: O
     const [isMobile, setIsMobile] = useState(false);
 
     useEffect(() => {
-      const checkDevice = () => {
-        setIsMobile(window.matchMedia(`(max-width: ${breakpoint}px)`).matches);
+      const checkDevice = (event: MediaQueryList | MediaQueryListEvent) => {
+        setIsMobile(event.matches);
       };
 
       // Initial detection
-      checkDevice();
+      const mediaQueryList = window.matchMedia(`(max-width: ${breakpoint}px)`);
+      checkDevice(mediaQueryList);
 
-      // Listener for windows resize
-      window.addEventListener('resize', checkDevice);
+      // Listener for media query change
+      mediaQueryList.addEventListener('change', checkDevice);
 
       // Cleanup listener
       return () => {
-        window.removeEventListener('resize', checkDevice);
+        mediaQueryList.removeEventListener('change', checkDevice);
       };
     }, []);
 
