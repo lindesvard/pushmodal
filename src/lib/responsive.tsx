@@ -1,5 +1,5 @@
 import { DialogContentProps, DialogProps } from '@radix-ui/react-dialog';
-import { useEffect, useState } from 'react';
+import { useLayoutEffect, useState } from 'react';
 
 type WrapperProps = DialogProps;
 type ContentProps = Omit<DialogContentProps, 'onAnimationEnd'> & {
@@ -21,7 +21,7 @@ export function createResponsiveWrapper({ mobile, desktop, breakpoint = 640 }: O
   function useIsMobile() {
     const [isMobile, setIsMobile] = useState(false);
 
-    useEffect(() => {
+    useLayoutEffect(() => {
       const checkDevice = (event: MediaQueryList | MediaQueryListEvent) => {
         setIsMobile(event.matches);
       };
