@@ -9,30 +9,32 @@ import postcss from 'rollup-plugin-postcss';
 import autoprefixer from 'autoprefixer';
 import { dts } from 'rollup-plugin-dts';
 
-const packageJson = require('./package.json');
+const entries = ['index', 'base-ui', 'core'];
 
 export default [
-  {
-    input: './src/index.ts',
+  ...entries.map((entry) => ({
+    input: `./src/${entry}.ts`,
     output: [
       {
-        file: packageJson.main,
+        file: `dist/${entry}.cjs.js`,
         format: 'cjs',
         interop: 'compat',
         exports: 'named',
         sourcemap: true,
         inlineDynamicImports: true,
+        banner: '"use client";',
       },
       {
-        file: packageJson.module,
+        file: `dist/${entry}.esm.js`,
         format: 'esm',
         exports: 'named',
         sourcemap: true,
         inlineDynamicImports: true,
+        banner: '"use client";',
       },
     ],
     plugins: [
-      clean('dist'),
+      ...(entry === 'index' ? [clean('dist')] : []),
       peerDepsExternal(),
       resolve(),
       commonjs(),
@@ -43,7 +45,7 @@ export default [
       typescript({
         tsconfig: './tsconfig.build.json',
       }),
-      terser(),
+      terser({ compress: { directives: false } }),
       postcss({
         plugins: [autoprefixer],
         modules: {
@@ -60,10 +62,10 @@ export default [
         use: ['sass'],
       }),
     ],
-  },
-  {
-    input: 'dist/index.d.ts',
-    output: [{ file: 'dist/index.d.ts', format: 'es' }],
+  })),
+  ...entries.map((entry) => ({
+    input: `dist/${entry}.d.ts`,
+    output: [{ file: `dist/${entry}.d.ts`, format: 'es' }],
     plugins: [dts()],
-  },
+  })),
 ];
