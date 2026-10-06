@@ -6,8 +6,9 @@ import mitt, { Handler } from 'mitt';
 /** The controlled root props shared by Radix, Base UI, and custom wrappers. */
 export interface ModalWrapperProps {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
+  onOpenChange: (open?: boolean) => void;
   children: React.ReactNode;
+  defaultOpen?: boolean;
 }
 
 export interface CreatePushModalOptions<T> {
@@ -177,6 +178,7 @@ export function createPushModal<T>({ modals, Wrapper }: CreatePushModalCoreOptio
             <Root
               key={item.key}
               open={item.open}
+              defaultOpen
               onOpenChange={(isOpen) => {
                 if (!isOpen) {
                   emitter.emit('pop', { key: item.key });

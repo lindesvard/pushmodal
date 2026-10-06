@@ -24,14 +24,14 @@ export default [
         inlineDynamicImports: true,
         banner: '"use client";',
       },
-      {
-        file: `dist/${entry}.esm.js`,
+      ...['esm.js', 'mjs'].map((extension) => ({
+        file: `dist/${entry}.${extension}`,
         format: 'esm',
         exports: 'named',
         sourcemap: true,
         inlineDynamicImports: true,
         banner: '"use client";',
-      },
+      })),
     ],
     plugins: [
       ...(entry === 'index' ? [clean('dist')] : []),
