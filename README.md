@@ -16,8 +16,10 @@ Choose the entry point that matches your dialog components:
 | `pushmodal/base-ui` | Base UI `Dialog.Root`                   | `@base-ui/react`            |
 | `pushmodal/core`    | Your explicit `Wrapper`                 | Your wrapper's dependencies |
 
-The UI dependencies are optional peers: install the one you use. Base UI and core
-imports do not load Radix UI, including in their TypeScript declarations.
+Radix remains a required peer to preserve existing installation behavior. Base UI
+is an optional peer: install it when you use `pushmodal/base-ui`. Base UI and core
+entry points do not load Radix at runtime or in their TypeScript declarations,
+even if your package manager installs the Radix peer.
 
 ### Base UI / shadcn Base UI
 
@@ -78,9 +80,9 @@ export const { ModalProvider, pushModal } = createPushModal({
 ```
 
 `Wrapper` is required by `pushmodal/core` and optional in the other entry points.
-It must accept `open: boolean`, `onOpenChange: (open: boolean) => void`, and
-`children: React.ReactNode`. Roots receive controlled props only. Wrap the root
-in your own component to configure options such as `modal` or to handle Base UI's
+It must accept `open: boolean`, `onOpenChange: (open?: boolean) => void`, and
+`children: React.ReactNode`. Roots receive controlled `open` and the legacy
+`defaultOpen` prop. Wrap the root in your own component to configure options such as `modal` or to handle Base UI's
 additional change-event details. Pair each modal's content with the matching
 wrapper library.
 
@@ -264,9 +266,10 @@ const unsub = onPushModal('*', (open, props, name) => {
 
 #### Responsive rendering (mobile/desktop)
 
-`createResponsiveWrapper` is available from every entry point. It infers the
-root and content props from your components and accepts Base UI, Radix, or custom
-components. The returned components accept props supported by both variants;
+`createResponsiveWrapper` from `pushmodal` retains its original Radix props.
+The Base UI and core entry points infer root and content props from your
+components and accept Base UI, Radix, or custom components. Their returned
+components accept props supported by both variants;
 for example, use a string `className` when pairing Base UI with a Vaul drawer.
 Import this helper from `pushmodal/base-ui` or `pushmodal/core` in a Base UI app
 to avoid loading Radix. The wrapper and content for each variant must use the

@@ -140,20 +140,32 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.esm.js",
+      "node": "./dist/index.cjs.js",
+      "import": "./dist/index.mjs",
       "require": "./dist/index.cjs.js"
     },
     "./base-ui": {
       "types": "./dist/base-ui.d.ts",
-      "import": "./dist/base-ui.esm.js",
+      "node": "./dist/base-ui.cjs.js",
+      "import": "./dist/base-ui.mjs",
       "require": "./dist/base-ui.cjs.js"
     },
     "./core": {
       "types": "./dist/core.d.ts",
-      "import": "./dist/core.esm.js",
+      "node": "./dist/core.cjs.js",
+      "import": "./dist/core.mjs",
       "require": "./dist/core.cjs.js"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./dist/*.cjs": "./dist/*.cjs.js",
+    "./dist/*.esm": "./dist/*.esm.js",
+    "./dist/*.d.ts": "./dist/*.d.ts",
+    "./dist/*.d": "./dist/*.d.ts",
+    "./dist/*": {
+      "types": "./dist/*.d.ts",
+      "default": "./dist/*"
+    },
+    "./*": "./*"
   },
   "typesVersions": {
     "*": {
@@ -162,13 +174,13 @@
       ],
       "core": [
         "dist/core.d.ts"
+      ],
+      "*": [
+        "*"
       ]
     }
   },
   "peerDependenciesMeta": {
-    "@radix-ui/react-dialog": {
-      "optional": true
-    },
     "@base-ui/react": {
       "optional": true
     }

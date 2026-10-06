@@ -5,4 +5,4 @@ export type {
   CreatePushModalCoreOptions as CreatePushModalOptions,
   ModalWrapperProps,
 } from './lib/core';
-export { createResponsiveWrapper } from './lib/responsive';
+export { createResponsiveWrapper } from './lib/responsive-core';
