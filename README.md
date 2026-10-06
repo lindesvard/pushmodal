@@ -8,7 +8,83 @@
 pnpm add pushmodal
 ```
 
-> We take for granted that you already have `@radix-ui/react-dialog` installed. If not ➡️ `pnpm add @radix-ui/react-dialog`
+Choose the entry point that matches your dialog components:
+
+| Import              | Default wrapper                         | UI dependency to install    |
+| ------------------- | --------------------------------------- | --------------------------- |
+| `pushmodal`         | Radix `Dialog.Root` (existing behavior) | `@radix-ui/react-dialog`    |
+| `pushmodal/base-ui` | Base UI `Dialog.Root`                   | `@base-ui/react`            |
+| `pushmodal/core`    | Your explicit `Wrapper`                 | Your wrapper's dependencies |
+
+The UI dependencies are optional peers: install the one you use. Base UI and core
+imports do not load Radix UI, including in their TypeScript declarations.
+
+### Base UI / shadcn Base UI
+
+```sh
+pnpm add pushmodal @base-ui/react
+```
+
+Keep using your Base UI-backed shadcn `DialogContent` or `SheetContent` in the modal,
+without its root. Change the factory import:
+
+```tsx
+import { createPushModal } from 'pushmodal/base-ui';
+import { DialogContent, DialogTitle } from '@/ui/dialog'; // shadcn Base UI dialog
+
+function EditProfile({ userId }: { userId: string }) {
+  return (
+    <DialogContent>
+      <DialogTitle>Edit profile</DialogTitle>
+      Editing {userId}
+    </DialogContent>
+  );
+}
+
+export const { ModalProvider, pushModal, popModal } = createPushModal({
+  modals: { EditProfile },
+});
+
+// Mount <ModalProvider /> once, then open from anywhere:
+pushModal('EditProfile', { userId: '123' });
+```
+
+For unstyled Base UI, the modal should render `Dialog.Portal`, `Dialog.Backdrop`,
+`Dialog.Popup`, and the title/description/close parts instead of shadcn's content.
+Use `@base-ui/react/dialog` for these parts. The factory supplies `Dialog.Root` and
+controls `open` and `onOpenChange`; Base UI's Close button and Escape dismissal
+update the same modal stack as `popModal`.
+
+### Choosing a default wrapper
+
+Set `Wrapper` once for all shorthand modals. A per-modal `Wrapper` overrides it,
+so dialogs and drawers can coexist. Use the core entry point to supply your own
+root without loading either dialog library:
+
+```tsx
+import { createPushModal } from 'pushmodal/core';
+import { Dialog } from '@/ui/dialog';
+import { Drawer } from '@/ui/drawer';
+import EditProfile from './edit-profile';
+import MobileSettings from './mobile-settings';
+
+export const { ModalProvider, pushModal } = createPushModal({
+  Wrapper: Dialog,
+  modals: {
+    EditProfile,
+    MobileSettings: { Wrapper: Drawer, Component: MobileSettings },
+  },
+});
+```
+
+`Wrapper` is required by `pushmodal/core` and optional in the other entry points.
+It must accept `open: boolean`, `onOpenChange: (open: boolean) => void`, and
+`children: React.ReactNode`. Roots receive controlled props only. Wrap the root
+in your own component to configure options such as `modal` or to handle Base UI's
+additional change-event details. Pair each modal's content with the matching
+wrapper library.
+
+The existing Radix setup below continues to work unchanged.
 
 ## Usage
 
@@ -59,7 +135,7 @@ export const {
     SheetExample,
 
     // Longer definition where you can choose what wrapper you want
-    // Only needed if you don't want `Dialog.Root` from '@radix-ui/react-dialog'
+    // Only needed to override the default Wrapper for this modal
     // shadcn drawer needs a custom Wrapper
     DrawerExample: {
       Wrapper: Drawer,
@@ -187,6 +263,14 @@ const unsub = onPushModal('*', (open, props, name) => {
 ```
 
 #### Responsive rendering (mobile/desktop)
+
+`createResponsiveWrapper` is available from every entry point. It infers the
+root and content props from your components and accepts Base UI, Radix, or custom
+components. The returned components accept props supported by both variants;
+for example, use a string `className` when pairing Base UI with a Vaul drawer.
+Import this helper from `pushmodal/base-ui` or `pushmodal/core` in a Base UI app
+to avoid loading Radix. The wrapper and content for each variant must use the
+same library.
 
 In some cases you want to show a drawer on mobile and a dialog on desktop. This is possible and we have created a helper function to get you going faster. `createResponsiveWrapper` 💪 
 

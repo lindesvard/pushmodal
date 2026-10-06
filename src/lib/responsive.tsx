@@ -1,23 +1,37 @@
-import { DialogContentProps, DialogProps } from '@radix-ui/react-dialog';
-import { useLayoutEffect, useState } from 'react';
+'use client';
 
-type WrapperProps = DialogProps;
-type ContentProps = Omit<DialogContentProps, 'onAnimationEnd'> & {
-  onAnimationEnd?: (...args: any[]) => void;
-};
-type Options = {
+import { useLayoutEffect, useState } from 'react';
+import type { ComponentType } from 'react';
+
+// Infer each component's props, then expose only props accepted by both variants.
+// This preserves library-specific props without importing Radix or Base UI types.
+interface Options<
+  MobileWrapperProps,
+  DesktopWrapperProps,
+  MobileContentProps,
+  DesktopContentProps,
+> {
   mobile: {
-    Wrapper: React.ComponentType<WrapperProps>;
-    Content: React.ComponentType<ContentProps>;
+    Wrapper: ComponentType<MobileWrapperProps>;
+    Content: ComponentType<MobileContentProps>;
   };
   desktop: {
-    Wrapper: React.ComponentType<WrapperProps>;
-    Content: React.ComponentType<ContentProps>;
+    Wrapper: ComponentType<DesktopWrapperProps>;
+    Content: ComponentType<DesktopContentProps>;
   };
   breakpoint?: number;
-};
+}
 
-export function createResponsiveWrapper({ mobile, desktop, breakpoint = 640 }: Options) {
+export function createResponsiveWrapper<
+  MobileWrapperProps extends object,
+  DesktopWrapperProps extends object,
+  MobileContentProps extends object,
+  DesktopContentProps extends object,
+>({
+  mobile,
+  desktop,
+  breakpoint = 640,
+}: Options<MobileWrapperProps, DesktopWrapperProps, MobileContentProps, DesktopContentProps>) {
   function useIsMobile() {
     const [isMobile, setIsMobile] = useState(false);
 
@@ -42,11 +56,11 @@ export function createResponsiveWrapper({ mobile, desktop, breakpoint = 640 }: O
     return isMobile;
   }
 
-  function Wrapper(props: WrapperProps) {
+  function Wrapper(props: MobileWrapperProps & DesktopWrapperProps) {
     const isMobile = useIsMobile();
     return isMobile ? <mobile.Wrapper {...props} /> : <desktop.Wrapper {...props} />;
   }
-  function Content(props: ContentProps) {
+  function Content(props: MobileContentProps & DesktopContentProps) {
     const isMobile = useIsMobile();
     return isMobile ? <mobile.Content {...props} /> : <desktop.Content {...props} />;
   }
