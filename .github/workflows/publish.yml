@@ -1,64 +1,72 @@
-# This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
-
-name: Node.js CI
+name: Publish npm package
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: npm-publish-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   quality:
-
     runs-on: ${{ matrix.os }}
-
     strategy:
       matrix:
-        node-version: [16.x, 17.x, 18.x]
         os: [ubuntu-latest, windows-latest]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
-
     steps:
-      - name: Checkout Frontend Git Repo
-        uses: actions/checkout@v4
-
-      - name: Setup Node ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
         with:
-          node-version: ${{ matrix.node-version }}
-
-      - name: Install Packages
-        run:  |
-          npm install -g pnpm
-          pnpm install --frozen-lockfile
-
-      - name: Run tests
-        run: pnpm test
+          version: 9.15.9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm run test --runInBand
+      - run: node --test scripts/check-release.test.cjs
 
   publish:
     runs-on: ubuntu-latest
-    if: ${{ github.ref == 'refs/heads/main' }}
-    needs: [quality]
+    needs: quality
     steps:
-      - name: Checkout Frontend Git Repo
-        uses: actions/checkout@v4
-
-      - name: Setup Node ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          version: 9.15.9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
           registry-url: https://registry.npmjs.org
-
-      - name: Install Packages
-        run: |
-          npm install -g pnpm
-          pnpm install --frozen-lockfile
-
-      - name: Build npm package
-        run: pnpm build-lib
-
-      - name: publish
-        run: npm publish --access public
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build-lib
+      - run: pnpm test:package
+      - name: Check stable release version
+        id: release
+        run: node scripts/check-release.cjs
+      - name: Validate npm package without publishing
+        run: npm publish --dry-run --access public --tag latest --registry https://registry.npmjs.org
+        working-directory: lib
+      - name: Authenticate and publish stable release
+        if: >-
+          github.event_name == 'push' &&
+          github.ref == 'refs/heads/main' &&
+          github.repository == 'lindesvard/pushmodal' &&
+          steps.release.outputs.publish == 'true'
+        shell: bash
         working-directory: lib
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ -z "$NODE_AUTH_TOKEN" ]; then
+            echo "::error::The NPM_TOKEN repository secret is missing."
+            exit 1
+          fi
+          npm whoami --registry https://registry.npmjs.org > /dev/null
+          npm publish --access public --tag latest --registry https://registry.npmjs.org
