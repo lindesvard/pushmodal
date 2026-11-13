@@ -41,7 +41,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - if: matrix.react == '19.2.8'
-        run: pnpm add -D react@19.2.8 react-dom@19.2.8
+        run: pnpm add -Dw -E react@19.2.8 react-dom@19.2.8
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm build-lib
       - run: pnpm test:browser
