@@ -3,6 +3,8 @@
 /dist
 /lib
 /coverage
+/test-results
+/playwright-report
 .nyc_output
 
 #docs

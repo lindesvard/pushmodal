@@ -1,0 +1,48 @@
+body {
+  font-family: sans-serif;
+}
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: #0003;
+}
+.popup {
+  position: fixed;
+  top: 20%;
+  left: 20%;
+  padding: 24px;
+  background: white;
+  border: 1px solid;
+  opacity: 1;
+  transform: translateX(0);
+}
+.transition {
+  transition:
+    opacity 200ms linear,
+    transform 200ms linear;
+}
+.transition[data-starting-style],
+.transition[data-ending-style] {
+  opacity: 0;
+  transform: translateX(40px);
+}
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+}
+@keyframes exit {
+  to {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+}
+.keyframe[data-open],
+.radix[data-state='open'] {
+  animation: enter 200ms linear;
+}
+.keyframe[data-closed],
+.radix[data-state='closed'] {
+  animation: exit 200ms linear;
+}
