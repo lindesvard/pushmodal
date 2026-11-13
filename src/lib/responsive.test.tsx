@@ -6,7 +6,7 @@ import { Drawer as VaulDrawer } from 'vaul';
 import { createResponsiveWrapper, createPushModal } from '../base-ui';
 import { createPushModal as createCorePushModal } from '../core';
 
-it('infers Base UI popup props and switches both root and content at the breakpoint', () => {
+it('infers Base UI popup props and switches both root and content at the breakpoint', async () => {
   const listeners = new Set<(event: MediaQueryListEvent) => void>();
   const mediaQuery = {
     matches: false,
@@ -59,7 +59,7 @@ it('infers Base UI popup props and switches both root and content at the breakpo
   });
   render(<api.ModalProvider />);
   act(() => api.pushModal('Responsive'));
-  expect(screen.getByRole('dialog', { name: 'Desktop' })).toHaveClass('open');
+  expect(await screen.findByRole('dialog', { name: 'Desktop' })).toHaveClass('open');
   expect(matchMedia).toHaveBeenCalledWith('(max-width: 700px)');
   act(() => {
     mediaQuery.matches = true;
